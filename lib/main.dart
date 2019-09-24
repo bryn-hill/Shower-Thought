@@ -157,41 +157,11 @@ class DeviceScreen extends StatelessWidget {
   final BluetoothDevice device;
 
   List<Widget> _buildServiceTiles(List<BluetoothService> services) {
-    services
-        .where(
-            (s) => s.uuid.toString() == '4fafc201-1fb5-459e-8fcc-c5c9c331914b')
-        .map((s) async {
-      print('value');
-      var characteristics = s.characteristics;
-      for (BluetoothCharacteristic c in characteristics) {
-        await c.setNotifyValue(true);
-        c.value.listen((value) {
-          print(value);
-          print('value');
-          // do something with new value
-        });
-      }
-    });
-    //  services
-    //     .where(
-    //         (s) => s.uuid.toString() == '4fafc201-1fb5-459e-8fcc-c5c9c331914b')
-    //     .map((s) async {
-
-    //   var characteristics = s.characteristics;
-    //   for (BluetoothCharacteristic c in characteristics) {
-    //     await c.setNotifyValue(true);
-    //     c.value.listen((value) {
-    //       print(value);
-    //       print('value');
-    //       // do something with new value
-    //     });
-    //   }
-    // });
     return services
         .where(
             (s) => s.uuid.toString() == '4fafc201-1fb5-459e-8fcc-c5c9c331914b')
         .map((s) => AnimatedRadialChartExample(
-              btValue: 'hello',
+              btValue: s.characteristics.first,
             ))
         .toList();
   }

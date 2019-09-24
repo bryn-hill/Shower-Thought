@@ -1,16 +1,23 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
 
 class AnimatedRadialChartExample extends StatefulWidget {
-  const AnimatedRadialChartExample({Key key, String btValue, this.onTap})
+  final VoidCallback onTap;
+
+  final BluetoothCharacteristic btValue;
+
+  const AnimatedRadialChartExample({Key key, this.btValue, this.onTap})
       : super(key: key);
 
-  final VoidCallback onTap;
-  final String btValue;
   @override
   _AnimatedRadialChartExampleState createState() {
-    return new _AnimatedRadialChartExampleState();
+    return new _AnimatedRadialChartExampleState(btValue);
   }
 }
 
@@ -19,17 +26,26 @@ class _AnimatedRadialChartExampleState
   final GlobalKey<AnimatedCircularChartState> _chartKey =
       new GlobalKey<AnimatedCircularChartState>();
 
-  _AnimatedRadialChartExampleState();
-
   final _chartSize = const Size(200.0, 200.0);
 
-  double value = 100.0;
+  int value = 0;
   Color labelColor = Colors.blue[200];
   double limit = 100.0;
 
+  BluetoothCharacteristic _btValue;
+
+  StreamSubscription<List<int>> getValueSub;
+
+  _AnimatedRadialChartExampleState(BluetoothCharacteristic btValue) {
+    _btValue = btValue;
+  }
+  var _result;
+
   void _increment() {
+    print(_result);
     setState(() {
       limit += 10;
+
       List<CircularStackEntry> data = _generateChartData(value);
 
       _chartKey.currentState.updateData(data);
@@ -45,7 +61,7 @@ class _AnimatedRadialChartExampleState
     });
   }
 
-  List<CircularStackEntry> _generateChartData(double value) {
+  List<CircularStackEntry> _generateChartData(int value) {
     Color dialColor = Colors.blue[200];
     if (value < 0) {
       dialColor = Colors.red[200];
@@ -53,7 +69,7 @@ class _AnimatedRadialChartExampleState
       dialColor = Colors.green[200];
     }
     labelColor = dialColor;
-    print(this.btValue);
+
     List<CircularStackEntry> data = <CircularStackEntry>[
       new CircularStackEntry(
         <CircularSegmentEntry>[
@@ -83,6 +99,34 @@ class _AnimatedRadialChartExampleState
     }
 
     return data;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _btValue.setNotifyValue(true).then((a) {
+      getValueSub =
+          // If we need to rebuild the widget with the resulting data,
+          // make sure to use `setState`
+          _btValue.value.listen((_value) {
+        Uint8List input = Uint8List.fromList(_value);
+        ByteData bd = input.buffer.asByteData();
+        int converted = bd.getUint16(1, Endian.little);
+        print(converted);
+        setState(() {
+          value = converted;
+        });
+        List<CircularStackEntry> data = _generateChartData(value);
+        _chartKey.currentState.updateData(data);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    getValueSub.cancel();
   }
 
   @override
