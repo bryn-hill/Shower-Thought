@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:shower_thought/chart.dart';
 import 'package:shower_thought/widgets.dart';
+import 'usage.dart';
+
 
 void main() {
   runApp(FlutterBlueApp());
@@ -51,12 +53,26 @@ class BluetoothOffScreen extends StatelessWidget {
               color: Colors.white54,
             ),
             Text(
-              'Bluetooth Adapter is ${state.toString().substring(15)}.',
+              'Bluetooth Adapter is ${state.toString().length > 0 ? 'off' : state.toString()}.',
               style: Theme.of(context)
                   .primaryTextTheme
                   .subhead
                   .copyWith(color: Colors.white),
             ),
+            FlatButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => WaterUsageScreen()),
+                  );
+                },
+                child: Text(
+                  'View Water Usage',
+                  style: Theme.of(context)
+                      .primaryTextTheme
+                      .button
+                      .copyWith(color: Colors.white),
+                ))
           ],
         ),
       ),

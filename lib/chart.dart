@@ -28,9 +28,9 @@ class _AnimatedRadialChartExampleState
 
   final _chartSize = const Size(200.0, 200.0);
 
-  int value = 0;
+  double value = 0;
   Color labelColor = Colors.blue[200];
-  double limit = 100.0;
+  double limit = 20.0;
 
   BluetoothCharacteristic _btValue;
 
@@ -61,7 +61,7 @@ class _AnimatedRadialChartExampleState
     });
   }
 
-  List<CircularStackEntry> _generateChartData(int value) {
+  List<CircularStackEntry> _generateChartData(double value) {
     Color dialColor = Colors.blue[200];
     if (value < 0) {
       dialColor = Colors.red[200];
@@ -110,9 +110,10 @@ class _AnimatedRadialChartExampleState
           // If we need to rebuild the widget with the resulting data,
           // make sure to use `setState`
           _btValue.value.listen((_value) {
+        print(_value);
         Uint8List input = Uint8List.fromList(_value);
         ByteData bd = input.buffer.asByteData();
-        int converted = bd.getUint16(1, Endian.little);
+        double converted = bd.getFloat32(0, Endian.little);
         print(converted);
         setState(() {
           value = converted;
@@ -162,7 +163,7 @@ class _AnimatedRadialChartExampleState
                   chartType: CircularChartType.Radial,
                   edgeStyle: SegmentEdgeStyle.round,
                   percentageValues: true,
-                  holeLabel: '$value lt',
+                  holeLabel: value.toStringAsFixed(2) + ' lt',
                   labelStyle: _labelStyle,
                 ),
               ),
