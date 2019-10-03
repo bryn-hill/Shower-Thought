@@ -28,7 +28,7 @@ class TimeSeriesBar extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       children: <Widget>[
         Container(
-            height: 500,
+            height: 300,
             color: Colors.white,
             child: new charts.TimeSeriesChart(
               seriesData,
@@ -48,7 +48,7 @@ class TimeSeriesBar extends StatelessWidget {
               ],
             )),
         Container(
-          height: 250,
+          height: 450,
           color: Colors.grey[100],
           child: new Items(seriesList),
         ),
@@ -62,16 +62,15 @@ class Items extends StatelessWidget {
   Items(this.items);
 
   Widget _buildProductItem(BuildContext context, int index) {
-    return Card(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(new DateFormat('yyyy-MM-dd').format(items[index].time),
-              style: TextStyle(color: Colors.deepPurple)),
-          Text(items[index].waterConsumption,
-              style: TextStyle(color: Colors.deepPurple))
-        ],
-      ),
+    return ListView(
+      shrinkWrap: true,
+      children: <Widget>[
+        ListTile(
+            title: Text(new DateFormat('yyyy-MM-dd').format(items[index].time),
+                style: TextStyle(color: Colors.deepPurple)),
+            subtitle: Text(items[index].waterConsumption,
+                style: TextStyle(color: Colors.deepPurple)))
+      ],
     );
   }
 
