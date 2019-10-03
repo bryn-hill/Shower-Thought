@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "82223780279",
+    "firebase_url": "https://shower-thought.firebaseio.com",
+    "project_id": "shower-thought",
+    "storage_bucket": "shower-thought.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:82223780279:android:1c13048e9b0a17d8075832",
+        "android_client_info": {
+          "package_name": "com.bryn.showerthought"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "82223780279-kotv98a0eil6keugnj04qmao8pj47pq1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBk5SZCL4V1VWWcRmbsVTG4lvqaw4LAOuE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "82223780279-kotv98a0eil6keugnj04qmao8pj47pq1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

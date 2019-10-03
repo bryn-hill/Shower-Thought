@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_circular_chart/flutter_circular_chart.dart';
+import 'package:intl/intl.dart';
 
 class AnimatedRadialChartExample extends StatefulWidget {
   final VoidCallback onTap;
@@ -30,7 +31,7 @@ class _AnimatedRadialChartExampleState
 
   double value = 0;
   Color labelColor = Colors.blue[200];
-  double limit = 20.0;
+  double limit = 20;
 
   BluetoothCharacteristic _btValue;
 
@@ -45,20 +46,27 @@ class _AnimatedRadialChartExampleState
     print(_result);
     setState(() {
       limit += 10;
-
-      List<CircularStackEntry> data = _generateChartData(value);
-
-      _chartKey.currentState.updateData(data);
     });
+    Firestore.instance
+        .collection('me')
+        .document('shower')
+        .setData({'limit': limit}, merge: true);
+    List<CircularStackEntry> data = _generateChartData(value);
+
+    _chartKey.currentState.updateData(data);
   }
 
   void _decrement() {
+    if (limit < 20) return;
     setState(() {
-      if (limit < 20) return;
       limit -= 10;
-      List<CircularStackEntry> data = _generateChartData(value);
-      _chartKey.currentState.updateData(data);
     });
+    Firestore.instance
+        .collection('me')
+        .document('shower')
+        .setData({'limit': limit}, merge: true);
+    List<CircularStackEntry> data = _generateChartData(value);
+    _chartKey.currentState.updateData(data);
   }
 
   List<CircularStackEntry> _generateChartData(double value) {
@@ -105,16 +113,29 @@ class _AnimatedRadialChartExampleState
   void initState() {
     super.initState();
 
+    Firestore.instance
+        .collection('me')
+        .document('shower')
+        .get()
+        .then((DocumentSnapshot ds) {
+      if (limit == ds.data['limit'] || ds.data['limit'] == null) return;
+      setState(() {
+        limit = ds.data['limit'];
+      });
+      List<CircularStackEntry> data = _generateChartData(value);
+
+      _chartKey.currentState.updateData(data);
+    });
+
     _btValue.setNotifyValue(true).then((a) {
       getValueSub =
           // If we need to rebuild the widget with the resulting data,
           // make sure to use `setState`
           _btValue.value.listen((_value) {
-        print(_value);
         Uint8List input = Uint8List.fromList(_value);
         ByteData bd = input.buffer.asByteData();
         double converted = bd.getFloat32(0, Endian.little);
-        print(converted);
+        if ((value == converted) || converted == null) return;
         setState(() {
           value = converted;
         });
@@ -128,6 +149,12 @@ class _AnimatedRadialChartExampleState
   void dispose() {
     super.dispose();
     getValueSub.cancel();
+    var now = new DateTime.now();
+    String formattedDate = new DateFormat('yyyy-MM-dd').format(now);
+    Firestore.instance
+        .collection('me')
+        .document('shower')
+        .setData({formattedDate: value}, merge: true);
   }
 
   @override

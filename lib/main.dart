@@ -6,31 +6,49 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue/flutter_blue.dart';
+import 'package:shower_thought/auth-page.dart';
 import 'package:shower_thought/chart.dart';
 import 'package:shower_thought/widgets.dart';
 import 'usage.dart';
 
-
 void main() {
-  runApp(FlutterBlueApp());
+  //runApp(FlutterBlueApp());
+  runApp((FlutterBlueApp()));
 }
 
 class FlutterBlueApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      color: Colors.lightBlue,
-      home: StreamBuilder<BluetoothState>(
-          stream: FlutterBlue.instance.state,
-          initialData: BluetoothState.unknown,
-          builder: (c, snapshot) {
-            final state = snapshot.data;
-            if (state == BluetoothState.on) {
-              return FindDevicesScreen();
-            }
-            return BluetoothOffScreen(state: state);
-          }),
-    );
+        color: Colors.lightBlue,
+        home: DefaultTabController(
+            length: 2,
+            child: Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  tabs: [
+                    Tab(icon: Icon(Icons.directions_car)),
+                    Tab(icon: Icon(Icons.directions_transit)),
+                  ],
+                ),
+                title: Text('Shower Thought'),
+              ),
+              body: TabBarView(
+                children: [
+                  StreamBuilder<BluetoothState>(
+                      stream: FlutterBlue.instance.state,
+                      initialData: BluetoothState.unknown,
+                      builder: (c, snapshot) {
+                        final state = snapshot.data;
+                        if (state == BluetoothState.on) {
+                          return FindDevicesScreen();
+                        }
+                        return BluetoothOffScreen(state: state);
+                      }),
+                  Icon(Icons.directions_transit),
+                ],
+              ),
+            )));
   }
 }
 
@@ -80,9 +98,14 @@ class BluetoothOffScreen extends StatelessWidget {
   }
 }
 
-class FindDevicesScreen extends StatelessWidget {
+class FindDevicesScreen extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
+  State<StatefulWidget> createState(){
+    return _FindDevicesScreen();
+  };
+}
+ class _FindDevicesScreen{
+    Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Find Devices'),
@@ -99,27 +122,29 @@ class FindDevicesScreen extends StatelessWidget {
                 initialData: [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data
-                      .map((d) => ListTile(
-                            title: Text(d.name),
-                            subtitle: Text(d.id.toString()),
-                            trailing: StreamBuilder<BluetoothDeviceState>(
-                              stream: d.state,
-                              initialData: BluetoothDeviceState.disconnected,
-                              builder: (c, snapshot) {
-                                if (snapshot.data ==
-                                    BluetoothDeviceState.connected) {
-                                  return RaisedButton(
-                                    child: Text('OPEN'),
-                                    onPressed: () => Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                DeviceScreen(device: d))),
-                                  );
-                                }
-                                return Text(snapshot.data.toString());
-                              },
-                            ),
-                          ))
+                      .map(
+                        (d) => ListTile(
+                          title: Text(d.name),
+                          subtitle: Text(d.id.toString()),
+                          trailing: StreamBuilder<BluetoothDeviceState>(
+                            stream: d.state,
+                            initialData: BluetoothDeviceState.disconnected,
+                            builder: (c, snapshot) {
+                              if (snapshot.data ==
+                                  BluetoothDeviceState.connected) {
+                                return RaisedButton(
+                                  child: Text('OPEN'),
+                                  onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              DeviceScreen(device: d))),
+                                );
+                              }
+                              return Text(snapshot.data.toString());
+                            },
+                          ),
+                        ),
+                      )
                       .toList(),
                 ),
               ),
