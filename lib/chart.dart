@@ -147,7 +147,6 @@ class _AnimatedRadialChartExampleState
 
   @override
   void dispose() {
-    super.dispose();
     getValueSub.cancel();
     var now = new DateTime.now();
     String formattedDate = new DateFormat('yyyy-MM-dd').format(now);
@@ -155,6 +154,7 @@ class _AnimatedRadialChartExampleState
         .collection('me')
         .document('shower')
         .setData({formattedDate: value}, merge: true);
+    super.dispose();
   }
 
   @override

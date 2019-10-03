@@ -17,6 +17,8 @@ void main() {
 }
 
 class FlutterBlueApp extends StatelessWidget {
+  StreamController<BluetoothState> _controller =
+      StreamController<BluetoothState>.broadcast();
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -27,8 +29,8 @@ class FlutterBlueApp extends StatelessWidget {
               appBar: AppBar(
                 bottom: TabBar(
                   tabs: [
-                    Tab(icon: Icon(Icons.directions_car)),
-                    Tab(icon: Icon(Icons.directions_transit)),
+                    Tab(icon: Icon(Icons.bluetooth)),
+                    Tab(icon: Icon(Icons.data_usage)),
                   ],
                 ),
                 title: Text('Shower Thought'),
@@ -36,8 +38,8 @@ class FlutterBlueApp extends StatelessWidget {
               body: TabBarView(
                 children: [
                   StreamBuilder<BluetoothState>(
-                      stream: FlutterBlue.instance.state,
-                      initialData: BluetoothState.unknown,
+                      stream: _controller.stream,
+                      initialData: BluetoothState.on,
                       builder: (c, snapshot) {
                         final state = snapshot.data;
                         if (state == BluetoothState.on) {
@@ -45,7 +47,7 @@ class FlutterBlueApp extends StatelessWidget {
                         }
                         return BluetoothOffScreen(state: state);
                       }),
-                  Icon(Icons.directions_transit),
+                  new WaterUsageScreen(),
                 ],
               ),
             )));
@@ -100,12 +102,24 @@ class BluetoothOffScreen extends StatelessWidget {
 
 class FindDevicesScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState(){
-    return _FindDevicesScreen();
-  };
+  State<StatefulWidget> createState() {
+    return new _FindDevicesScreen();
+  }
 }
- class _FindDevicesScreen{
-    Widget build(BuildContext context) {
+
+class _FindDevicesScreen extends State<FindDevicesScreen> {
+  final Stream<List<BluetoothDevice>> stream =
+      Stream.periodic(Duration(seconds: 2))
+          .asyncMap((_) => FlutterBlue.instance.connectedDevices);
+
+  @override
+  void dispose() {
+    print('here');
+    FlutterBlue.instance.stopScan();
+    super.dispose();
+  }
+
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Find Devices'),
@@ -117,8 +131,7 @@ class FindDevicesScreen extends StatefulWidget {
           child: Column(
             children: <Widget>[
               StreamBuilder<List<BluetoothDevice>>(
-                stream: Stream.periodic(Duration(seconds: 2))
-                    .asyncMap((_) => FlutterBlue.instance.connectedDevices),
+                stream: stream.asBroadcastStream(),
                 initialData: [],
                 builder: (c, snapshot) => Column(
                   children: snapshot.data
